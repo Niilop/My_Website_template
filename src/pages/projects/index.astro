@@ -1,0 +1,112 @@
+---
+import { getImage } from 'astro:assets';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
+import ProjectFilter, { type FilterableProject } from '../../components/react/ProjectFilter';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjects } from '../../lib/content';
+
+const projects = await getProjects();
+
+// The React island receives plain data, so images are optimized here first.
+const items: FilterableProject[] = await Promise.all(
+  projects.map(async (project) => {
+    const cover = project.data.cover;
+    const image = cover ? await getImage({ src: cover.src, widths: [400, 800] }) : undefined;
+    return {
+      id: project.id,
+      title: project.data.title,
+      summary: project.data.summary,
+      href: `/projects/${project.id}/`,
+      tags: project.data.tags,
+      image:
+        image && cover
+          ? {
+              src: image.src,
+              srcset: image.srcSet.attribute,
+              width: Number(image.attributes.width ?? cover.src.width),
+              height: Number(image.attributes.height ?? cover.src.height),
+              alt: cover.alt,
+            }
+          : undefined,
+    };
+  }),
+);
+---
+
+<BaseLayout title="Projects" description="A selection of recent projects.">
+  <Hero title="Projects" lead="A selection of recent work. Each project is a Markdown file." />
+  <Section>
+    {items.length > 0 ? (
+      <ProjectFilter client:visible projects={items} />
+    ) : (
+      <p>No projects have been published yet.</p>
+    )}
+  </Section>
+</BaseLayout>
+
+<style>
+  /* Styles for the React island. Card styles mirror src/components/Card.astro. */
+  :global(.filter-bar) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+  }
+  :global(.filter-button) {
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    border: var(--border);
+    border-color: var(--color-text-muted);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+  }
+  :global(.filter-button[aria-pressed='true']) {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+  }
+  :global(.project-filter .card) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  :global(.project-filter .card-image) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  :global(.project-filter .card-body) {
+    padding: var(--space-5);
+  }
+  :global(.project-filter .card-title) {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+  }
+  :global(.project-filter .card-title a) {
+    color: inherit;
+    text-decoration: none;
+  }
+  :global(.project-filter .card-title a::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  :global(.project-filter .card:hover .card-title a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  :global(.project-filter .card:has(a:focus-visible)) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  :global(.project-filter .card-title a:focus-visible) {
+    outline: none;
+  }
+</style>

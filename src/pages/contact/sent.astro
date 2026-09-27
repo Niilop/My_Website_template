@@ -1,0 +1,11 @@
+---
+import Button from '../../components/Button.astro';
+import Hero from '../../components/Hero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Message sent" description="Thank you for your message." noindex>
+  <Hero title="Thank you!" lead="Your message has been sent. We will get back to you soon.">
+    <Button href="/">Back to the home page</Button>
+  </Hero>
+</BaseLayout>

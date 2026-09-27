@@ -1,0 +1,107 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import portrait from '../assets/portrait.jpg';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const exhibitions = (await getCollection('exhibitions')).sort((a, b) => b.data.year - a.data.year);
+const lists = [
+  { title: 'Solo exhibitions', items: exhibitions.filter((e) => e.data.kind === 'solo') },
+  { title: 'Group exhibitions', items: exhibitions.filter((e) => e.data.kind === 'group') },
+].filter((list) => list.items.length > 0);
+---
+
+<BaseLayout title="About" description={`Biography, statement, and exhibitions of ${site.name}.`}>
+  <div class="container about">
+    <Image
+      src={portrait}
+      alt="Placeholder portrait: soft abstract shapes in warm grey tones."
+      widths={[400, 800]}
+      sizes="(min-width: 60rem) 30vw, 100vw"
+      class="portrait"
+      loading="eager"
+    />
+    <div class="text">
+      <h1>About</h1>
+      <p class="statement">
+        Replace this with a short artist statement: what the work is about and how you approach it.
+        Two or three sentences are enough.
+      </p>
+      <p>
+        Replace this with a biography: where you are based, your training, and what you are working
+        on now. Edit the text directly in <code>src/pages/about.astro</code>.
+      </p>
+    </div>
+  </div>
+
+  {lists.length > 0 && (
+    <Section title="Exhibitions">
+      {lists.map((list) => (
+        <>
+          <h3>{list.title}</h3>
+          <ul class="exhibitions">
+            {list.items.map(({ data }) => (
+              <li>
+                <span class="year">{data.year}</span>
+                <span>
+                  <em>{data.title}</em>, {data.venue}, {data.city}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ))}
+    </Section>
+  )}
+</BaseLayout>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-6);
+    padding-top: var(--space-8);
+  }
+  @media (min-width: 60rem) {
+    .about {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      align-items: start;
+    }
+  }
+  .portrait {
+    width: 100%;
+    max-width: 28rem;
+  }
+  .text {
+    max-width: var(--width-narrow);
+  }
+  .statement {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    line-height: 1.45;
+  }
+  h3 {
+    margin-top: var(--space-6);
+    font-size: var(--text-lg);
+  }
+  h3,
+  .exhibitions {
+    max-width: var(--width-narrow);
+  }
+  .exhibitions {
+    padding: 0;
+    list-style: none;
+  }
+  .exhibitions li {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-2);
+    border-bottom: var(--border);
+  }
+  .year {
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

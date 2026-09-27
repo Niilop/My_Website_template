@@ -1,0 +1,64 @@
+---
+/**
+ * A page section with an optional heading and intro, constrained to a content width.
+ */
+export interface Props {
+  title?: string;
+  intro?: string;
+  /** Used for the heading id and in-page links. */
+  id?: string;
+  width?: 'narrow' | 'default' | 'wide';
+  tone?: 'default' | 'muted';
+  headingLevel?: 2 | 3;
+}
+
+const { title, intro, id, width = 'default', tone = 'default', headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const headingId = title
+  ? `${id ?? title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-heading`
+  : undefined;
+---
+
+<section id={id} class:list={['section', `section--${tone}`]} aria-labelledby={headingId}>
+  <div
+    class:list={[
+      'container',
+      { 'container--narrow': width === 'narrow', 'container--wide': width === 'wide' },
+    ]}
+  >
+    {(title || intro || Astro.slots.has('actions')) && (
+      <div class="section-header">
+        <div>
+          {title && <Heading id={headingId}>{title}</Heading>}
+          {intro && <p class="intro muted">{intro}</p>}
+        </div>
+        <slot name="actions" />
+      </div>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    padding-block: var(--space-8) 0;
+  }
+  .section--muted {
+    margin-top: var(--space-8);
+    padding-block: var(--space-8);
+    background: var(--color-surface);
+  }
+  .section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .intro {
+    max-width: var(--width-narrow);
+    margin: 0;
+    font-size: var(--text-lg);
+  }
+</style>

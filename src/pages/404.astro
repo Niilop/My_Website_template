@@ -1,0 +1,18 @@
+---
+import Button from '../components/Button.astro';
+import Hero from '../components/Hero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for does not exist."
+  noindex
+>
+  <Hero
+    title="Page not found"
+    lead="The page may have moved, or the address may be mistyped. Try the home page or the menu above."
+  >
+    <Button href="/">Go to the home page</Button>
+  </Hero>
+</BaseLayout>

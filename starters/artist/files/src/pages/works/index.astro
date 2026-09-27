@@ -1,0 +1,57 @@
+---
+import Gallery from '../../components/Gallery.astro';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWorks, groupBySeries, slugify, workCaption } from '../../lib/content';
+
+const groups = groupBySeries(await getWorks()).map((group) => ({
+  ...group,
+  title: group.series ?? 'Other works',
+  id: group.series ? slugify(group.series) : 'other-works',
+}));
+---
+
+<BaseLayout title="Works" description="Paintings and works on paper, grouped by series.">
+  <Hero title="Works" />
+
+  {groups.length > 1 && (
+    <nav class="container series-nav" aria-label="Series">
+      <ul>
+        {groups.map((group) => (
+          <li>
+            <a href={`#${group.id}`}>{group.title}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  {groups.length === 0 && <p class="container">No works have been published yet.</p>}
+
+  {groups.map((group) => (
+    <Section title={group.title} id={group.id}>
+      <Gallery
+        layout="natural"
+        label={group.title}
+        images={group.works.map((work) => ({
+          src: work.data.image.src,
+          alt: work.data.image.alt,
+          caption: workCaption(work),
+          href: `/works/${work.id}/`,
+        }))}
+      />
+    </Section>
+  ))}
+</BaseLayout>
+
+<style>
+  .series-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

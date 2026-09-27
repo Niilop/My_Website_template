@@ -1,0 +1,37 @@
+---
+import Card from '../../components/Card.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished } from '../../lib/content';
+
+const posts = (await getPublished('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="Blog" description="News, notes, and articles.">
+  <Hero title="Blog" lead="Posts are Markdown files in src/content/blog/." />
+  <Section>
+    {posts.length === 0 && <p>No posts have been published yet.</p>}
+    <ul class="grid">
+      {posts.map((post) => (
+        <li>
+          <Card
+            title={post.data.title}
+            href={`/blog/${post.id}/`}
+            description={post.data.description}
+            image={post.data.cover?.src}
+            imageAlt={post.data.cover?.alt}
+            headingLevel={2}
+          >
+            <p class="muted">
+              <FormattedDate date={post.data.pubDate} />
+            </p>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  </Section>
+</BaseLayout>

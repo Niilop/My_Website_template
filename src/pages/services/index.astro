@@ -1,0 +1,50 @@
+---
+import { render } from 'astro:content';
+import Button from '../../components/Button.astro';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getServices } from '../../lib/content';
+
+const services = await Promise.all(
+  (await getServices()).map(async (service) => ({
+    service,
+    Content: (await render(service)).Content,
+  })),
+);
+---
+
+<BaseLayout title="Services" description="The services we offer and how we can help.">
+  <Hero title="Services" lead="Each service is a Markdown file in src/content/services/." />
+
+  <Section width="narrow">
+    {services.length === 0 && <p>No services have been published yet.</p>}
+    <div class="services">
+      {services.map(({ service, Content }) => (
+        <article class="service" aria-labelledby={`service-${service.id}`}>
+          <h2 id={`service-${service.id}`}>{service.data.title}</h2>
+          <p class="lead">{service.data.summary}</p>
+          <div class="prose">
+            <Content />
+          </div>
+        </article>
+      ))}
+    </div>
+    <Button href="/contact/">Ask about a project</Button>
+  </Section>
+</BaseLayout>
+
+<style>
+  .services {
+    display: grid;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+  .service {
+    padding-bottom: var(--space-6);
+    border-bottom: var(--border);
+  }
+  .lead {
+    font-size: var(--text-lg);
+  }
+</style>

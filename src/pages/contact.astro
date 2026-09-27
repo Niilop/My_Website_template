@@ -1,0 +1,77 @@
+---
+import ContactForm from '../components/ContactForm.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const { email, phone, address } = site.contact;
+---
+
+<BaseLayout title="Contact" description={`How to get in touch with ${site.name}.`}>
+  <Hero title="Contact" lead="Replies usually arrive within two working days." />
+
+  <div class="container columns">
+    <Section title="Contact details" width="narrow">
+      <dl class="details">
+        {email && (
+          <>
+            <dt>Email</dt>
+            <dd>
+              <a href={`mailto:${email}`}>{email}</a>
+            </dd>
+          </>
+        )}
+        {phone && (
+          <>
+            <dt>Phone</dt>
+            <dd>
+              <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>
+            </dd>
+          </>
+        )}
+        {address.length > 0 && (
+          <>
+            <dt>Address</dt>
+            <dd>
+              {address.map((line) => (
+                <span class="line">{line}</span>
+              ))}
+            </dd>
+          </>
+        )}
+      </dl>
+    </Section>
+
+    {site.contactForm.enabled && (
+      <Section title="Send a message" width="narrow">
+        <ContactForm />
+      </Section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .columns {
+    display: grid;
+    gap: var(--space-6);
+  }
+  @media (min-width: 60rem) {
+    .columns {
+      grid-template-columns: 1fr 1.4fr;
+    }
+  }
+  /* Sections already add their own container; remove the nested gutter. */
+  .columns > :global(.section > .container) {
+    width: 100%;
+  }
+  .details dt {
+    font-weight: var(--weight-bold);
+  }
+  .details dd {
+    margin: 0 0 var(--space-4);
+  }
+  .line {
+    display: block;
+  }
+</style>

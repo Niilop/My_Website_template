@@ -1,0 +1,65 @@
+---
+import heroImage from '../assets/images/hero.jpg';
+import Button from '../components/Button.astro';
+import Card from '../components/Card.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getProjects, getServices } from '../lib/content';
+import { site } from '../site.config';
+
+const services = await getServices();
+const featured = (await getProjects()).filter((project) => project.data.featured).slice(0, 3);
+---
+
+<BaseLayout>
+  <Hero
+    title="We help ideas become useful websites."
+    lead={site.description}
+    image={heroImage}
+    imageAlt="Abstract composition of overlapping blue circles."
+  >
+    <Button href="/projects/">See our work</Button>
+    <Button href="/contact/" variant="secondary">
+      Get in touch
+    </Button>
+  </Hero>
+
+  {services.length > 0 && (
+    <Section title="What we do" intro="A small set of services, done carefully.">
+      <ul class="grid">
+        {services.map((service) => (
+          <li>
+            <Card title={service.data.title} description={service.data.summary} />
+          </li>
+        ))}
+      </ul>
+    </Section>
+  )}
+
+  {featured.length > 0 && (
+    <Section title="Selected projects">
+      <Button slot="actions" href="/projects/" variant="ghost">
+        All projects →
+      </Button>
+      <ul class="grid">
+        {featured.map((project) => (
+          <li>
+            <Card
+              title={project.data.title}
+              href={`/projects/${project.id}/`}
+              description={project.data.summary}
+              image={project.data.cover?.src}
+              imageAlt={project.data.cover?.alt}
+            />
+          </li>
+        ))}
+      </ul>
+    </Section>
+  )}
+
+  <Section title="Let's work together" tone="muted" width="narrow">
+    <p>Tell us a little about your project and we will get back to you within two working days.</p>
+    <Button href="/contact/">Contact us</Button>
+  </Section>
+</BaseLayout>

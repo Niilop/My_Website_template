@@ -1,0 +1,56 @@
+---
+import galleryProcess from '../assets/images/gallery-process.jpg';
+import galleryWorkspace from '../assets/images/gallery-workspace.jpg';
+import heroImage from '../assets/images/hero.jpg';
+import Gallery from '../components/Gallery.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const values = [
+  { title: 'Clarity', text: 'Plain language, simple structures, and no surprises.' },
+  { title: 'Care', text: 'Accessible, fast, and respectful of the people who use our work.' },
+  { title: 'Continuity', text: 'Documented work that is easy to maintain and hand over.' },
+];
+---
+
+<BaseLayout title="About" description={`Who we are and how ${site.name} works.`}>
+  <Hero
+    title="About us"
+    lead="Replace this with a short introduction: who you are, who you work with, and why."
+  />
+
+  <Section title="Our approach" width="narrow">
+    <p>
+      This page is built from ordinary components: a hero, sections, and a gallery. Edit the text
+      directly in <code>src/pages/about.astro</code>.
+    </p>
+    <ul>
+      {values.map((value) => (
+        <li>
+          <strong>{value.title}.</strong> {value.text}
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section title="Gallery">
+    <Gallery
+      label="Studio gallery"
+      images={[
+        {
+          src: galleryWorkspace,
+          alt: 'Abstract shapes in muted green tones.',
+          caption: 'Workspace',
+        },
+        { src: galleryProcess, alt: 'Abstract shapes in warm orange tones.', caption: 'Process' },
+        {
+          src: heroImage,
+          alt: 'Abstract blue circles on a dark blue gradient.',
+          caption: 'Details',
+        },
+      ]}
+    />
+  </Section>
+</BaseLayout>

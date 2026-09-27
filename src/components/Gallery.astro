@@ -1,0 +1,351 @@
+---
+/**
+ * Responsive image gallery with a full-screen viewer.
+ *
+ * - `layout="grid"`: uniform, cropped tiles.
+ * - `layout="natural"`: equal-height rows where every image keeps its proportions.
+ * - `layout="feature"`: the first image large and uncropped, the rest as small tiles below.
+ *
+ * Items without `href` open in the viewer (arrow keys, swipe, Escape; focus returns to the
+ * thumbnail). Without JavaScript they link to the large image. Items with `href` link to a page.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+
+export interface GalleryImage {
+  src: ImageMetadata;
+  /** Describe the image. Use '' only for purely decorative images. */
+  alt: string;
+  caption?: string;
+  /** Link to a page (e.g. an artwork page) instead of opening the viewer. */
+  href?: string;
+}
+
+export interface Props {
+  images: GalleryImage[];
+  /** Accessible name for the gallery and its viewer. */
+  label?: string;
+  layout?: 'grid' | 'natural' | 'feature';
+}
+
+const { images, label = 'Image gallery', layout = 'grid' } = Astro.props;
+
+const items = await Promise.all(
+  images.map(async (image) => {
+    if (image.href) return { ...image, full: undefined };
+    const widths = [800, 1600, 2400].filter((w) => w < image.src.width).concat(image.src.width);
+    const full = await getImage({ src: image.src, widths });
+    return { ...image, full };
+  }),
+);
+const hasViewer = items.some((item) => item.full);
+const thumbSizes =
+  layout === 'natural' ? '(min-width: 48rem) 40vw, 100vw' : '(min-width: 48rem) 33vw, 50vw';
+// The large first image in the feature layout.
+const featureImage = { widths: [640, 960, 1400, 1920], sizes: '(min-width: 64rem) 60vw, 100vw' };
+const imageProps = (index: number) =>
+  layout === 'feature' && index === 0
+    ? { ...featureImage, loading: 'eager' as const }
+    : { widths: [320, 640, 960], sizes: thumbSizes };
+---
+
+{items.length > 0 && (
+  <div class="gallery-root" data-gallery>
+    <ul class:list={['gallery', `gallery--${layout}`]} aria-label={label}>
+      {items.map((item, index) => (
+        <li style={`--ratio: ${(item.src.width / item.src.height).toFixed(4)}`}>
+          <figure>
+            {item.full ? (
+              <a
+                href={item.full.src}
+                data-viewer-item
+                data-srcset={item.full.srcSet.attribute}
+                data-alt={item.alt}
+                data-caption={item.caption ?? ''}
+                data-width={item.src.width}
+                data-height={item.src.height}
+              >
+                <Image src={item.src} alt={item.alt} {...imageProps(index)} />
+                <span class="visually-hidden"> (view larger)</span>
+              </a>
+            ) : (
+              <a href={item.href}>
+                <Image src={item.src} alt={item.alt} {...imageProps(index)} />
+              </a>
+            )}
+            {item.caption && <figcaption>{item.caption}</figcaption>}
+          </figure>
+        </li>
+      ))}
+    </ul>
+
+    {hasViewer && (
+      <dialog class="viewer" aria-label={label} data-viewer>
+        <div class="viewer-bar">
+          <p class="viewer-counter" data-viewer-counter />
+          <button type="button" class="viewer-button" data-viewer-close aria-label="Close">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+        <figure class="viewer-figure">
+          <img data-viewer-image alt="" sizes="100vw" />
+          <figcaption data-viewer-caption />
+        </figure>
+        <button
+          type="button"
+          class="viewer-button viewer-prev"
+          data-viewer-prev
+          aria-label="Previous image"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button
+          type="button"
+          class="viewer-button viewer-next"
+          data-viewer-next
+          aria-label="Next image"
+        >
+          <span aria-hidden="true">›</span>
+        </button>
+      </dialog>
+    )}
+  </div>
+)}
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+    const dialog = root.querySelector<HTMLDialogElement>('[data-viewer]');
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-viewer-item]')];
+    if (!dialog || links.length === 0) continue;
+
+    const image = dialog.querySelector<HTMLImageElement>('[data-viewer-image]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-viewer-caption]')!;
+    const counter = dialog.querySelector<HTMLElement>('[data-viewer-counter]')!;
+    const prev = dialog.querySelector<HTMLButtonElement>('[data-viewer-prev]')!;
+    const next = dialog.querySelector<HTMLButtonElement>('[data-viewer-next]')!;
+    let index = 0;
+    let opener: HTMLElement | null = null;
+
+    prev.hidden = next.hidden = links.length < 2;
+
+    const show = (i: number) => {
+      index = (i + links.length) % links.length;
+      const link = links[index];
+      image.removeAttribute('src');
+      image.srcset = link.dataset.srcset ?? '';
+      image.src = link.href;
+      image.alt = link.dataset.alt ?? '';
+      image.width = Number(link.dataset.width);
+      image.height = Number(link.dataset.height);
+      caption.textContent = link.dataset.caption ?? '';
+      caption.hidden = !link.dataset.caption;
+      counter.textContent = links.length > 1 ? `${index + 1} / ${links.length}` : '';
+    };
+
+    links.forEach((link, i) => {
+      link.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+        event.preventDefault();
+        opener = link;
+        show(i);
+        dialog.showModal();
+      });
+    });
+
+    prev.addEventListener('click', () => show(index - 1));
+    next.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-viewer-close]')!.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+    // Clicking the dark area around the image closes the viewer.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || event.target === dialog.querySelector('.viewer-figure')) {
+        dialog.close();
+      }
+    });
+    dialog.addEventListener('close', () => opener?.focus());
+
+    let startX: number | null = null;
+    dialog.addEventListener('pointerdown', (event) => (startX = event.clientX));
+    dialog.addEventListener('pointerup', (event) => {
+      if (startX === null || event.pointerType === 'mouse') return;
+      const dx = event.clientX - startX;
+      if (Math.abs(dx) > 50) show(dx > 0 ? index - 1 : index + 1);
+      startX = null;
+    });
+  }
+</script>
+
+<style>
+  .gallery {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  figure {
+    margin: 0;
+  }
+  a {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+  img {
+    width: 100%;
+    transition: transform var(--duration);
+  }
+  a:hover img {
+    transform: scale(1.02);
+  }
+  figcaption {
+    margin-top: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* Uniform cropped tiles */
+  .gallery--grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+  .gallery--grid img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  /* One large image, then small tiles */
+  .gallery--feature {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 7rem), 1fr));
+  }
+  .gallery--feature li:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: var(--space-3);
+  }
+  .gallery--feature li:first-child a {
+    width: fit-content;
+    margin-inline: auto;
+  }
+  .gallery--feature li:first-child img {
+    width: auto;
+    max-height: 80vh;
+  }
+  .gallery--feature li:first-child a:hover img {
+    transform: none;
+  }
+  .gallery--feature li:not(:first-child) img {
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  /* Equal-height rows; each item grows in proportion to its aspect ratio. */
+  .gallery--natural {
+    --row-height: clamp(9rem, 22vw, 18rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5) var(--space-4);
+  }
+  .gallery--natural li {
+    flex: var(--ratio) 1 calc(var(--ratio) * var(--row-height));
+  }
+  .gallery--natural img {
+    height: auto;
+  }
+  /* Absorbs part of the leftover space so a short last row is not blown up. */
+  .gallery--natural::after {
+    content: '';
+    flex: 1 1 0;
+  }
+
+  /* Viewer */
+  .viewer {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: var(--space-4);
+    border: 0;
+    background: #0b0b0b;
+    color: #f2f2f2;
+  }
+  .viewer[open] {
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+  .viewer::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+  :global(html:has(dialog[open])) {
+    overflow: hidden;
+  }
+  .viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .viewer-counter {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .viewer-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .viewer-figure img {
+    width: auto;
+    max-width: 100%;
+    max-height: calc(100dvh - 8rem);
+    object-fit: contain;
+    border-radius: 0;
+    transition: none;
+  }
+  .viewer-figure figcaption {
+    color: #d0d0d0;
+    text-align: center;
+  }
+  .viewer-button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.5);
+    color: #f2f2f2;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .viewer-button:hover {
+    background: rgb(255 255 255 / 0.15);
+  }
+  .viewer-button[hidden] {
+    display: none;
+  }
+  .viewer-prev,
+  .viewer-next {
+    position: fixed;
+    top: 50%;
+    translate: 0 -50%;
+    font-size: 1.75rem;
+  }
+  .viewer-prev {
+    left: var(--space-3);
+  }
+  .viewer-next {
+    right: var(--space-3);
+  }
+  .viewer :focus-visible {
+    outline-color: #ffffff;
+  }
+</style>
