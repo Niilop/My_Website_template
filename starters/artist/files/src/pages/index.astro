@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import Button from '../components/Button.astro';
+import Gallery from '../components/Gallery.astro';
+import Section from '../components/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getWorks, workCaption } from '../lib/content';
+import { site } from '../site.config';
+
+const works = await getWorks();
+const featured = works.filter((work) => work.data.featured);
+const [lead, ...selected] = featured.length > 0 ? featured : works;
+---
+
+<BaseLayout>
+  <div class="container intro">
+    <h1>{site.name}</h1>
+    <p class="muted">{site.description}</p>
+  </div>
+
+  {lead && (
+    <figure class="container lead-work">
+      <a href={`/works/${lead.id}/`}>
+        <Image
+          src={lead.data.image.src}
+          alt={lead.data.image.alt}
+          widths={[640, 960, 1400, 1920]}
+          sizes="(min-width: 76rem) 76rem, 100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </a>
+      <figcaption>
+        <a href={`/works/${lead.id}/`}>{lead.data.title}</a>, {lead.data.year}
+        <span class="muted"> · {lead.data.medium}</span>
+      </figcaption>
+    </figure>
+  )}
+
+  {selected.length > 0 && (
+    <Section title="Selected works">
+      <Button slot="actions" href="/works/" variant="ghost">
+        All works →
+      </Button>
+      <Gallery
+        layout="natural"
+        label="Selected works"
+        images={selected.map((work) => ({
+          src: work.data.image.src,
+          alt: work.data.image.alt,
+          caption: workCaption(work),
+          href: `/works/${work.id}/`,
+        }))}
+      />
+    </Section>
+  )}
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: var(--space-8) var(--space-7);
+    max-width: var(--width-default);
+  }
+  .intro h1 {
+    margin-bottom: var(--space-3);
+  }
+  .intro p {
+    max-width: var(--width-narrow);
+    margin: 0;
+    font-size: var(--text-lg);
+  }
+  .lead-work {
+    display: grid;
+    justify-items: center;
+    margin-block: 0;
+    text-align: center;
+  }
+  .lead-work img {
+    width: auto;
+    max-height: 80vh;
+  }
+  figcaption {
+    margin-top: var(--space-3);
+  }
+  figcaption a {
+    color: inherit;
+  }
+</style>

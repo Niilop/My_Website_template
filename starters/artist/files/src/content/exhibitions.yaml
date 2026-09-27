@@ -1,0 +1,25 @@
+# Exhibitions shown on the about page. Each entry needs a unique id.
+- id: 2026-quiet-rooms
+  year: 2026
+  title: Quiet Rooms
+  venue: Example Gallery
+  city: Example City
+  kind: solo
+- id: 2025-new-painting
+  year: 2025
+  title: New Painting Now
+  venue: Harbour Art Space
+  city: Example City
+  kind: group
+- id: 2024-tidal
+  year: 2024
+  title: Tidal
+  venue: Project Room North
+  city: Another City
+  kind: solo
+- id: 2023-summer
+  year: 2023
+  title: Summer Exhibition
+  venue: Regional Art Museum
+  city: Another City
+  kind: group

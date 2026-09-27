@@ -1,0 +1,87 @@
+---
+/**
+ * A link styled as a button when `href` is set, otherwise a `<button>`.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = (HTMLAttributes<'a'> | HTMLAttributes<'button'>) & {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'small' | 'medium' | 'large';
+};
+
+const { href, variant = 'primary', size = 'medium', class: className, ...rest } = Astro.props;
+const classes = ['button', `button--${variant}`, `button--${size}`, className];
+---
+
+{href ? (
+  <a href={href} class:list={classes} {...(rest as HTMLAttributes<'a'>)}>
+    <slot />
+  </a>
+) : (
+  <button
+    class:list={classes}
+    {...(rest as HTMLAttributes<'button'>)}
+    type={(rest as HTMLAttributes<'button'>).type ?? 'button'}
+  >
+    <slot />
+  </button>
+)}
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-pill);
+    font-weight: var(--weight-bold);
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--duration),
+      color var(--duration),
+      border-color var(--duration);
+  }
+  .button--small {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .button--medium {
+    padding: var(--space-3) var(--space-5);
+  }
+  .button--large {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-lg);
+  }
+  .button--primary {
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+  }
+  .button--primary:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    color: var(--color-accent-contrast);
+  }
+  .button--secondary {
+    background: transparent;
+    color: var(--color-accent);
+  }
+  .button--secondary:hover {
+    background: var(--color-surface);
+  }
+  .button--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-accent);
+  }
+  .button--ghost:hover {
+    text-decoration: underline;
+  }
+  .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>

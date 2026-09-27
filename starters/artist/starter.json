@@ -1,0 +1,15 @@
+{
+  "name": "Artist portfolio",
+  "description": "Image-first portfolio for artists: works with medium, dimensions, series, and availability; exhibitions list; full-screen viewer.",
+  "remove": [
+    "src/pages/projects",
+    "src/pages/services",
+    "src/pages/blog",
+    "src/content/projects",
+    "src/content/services",
+    "src/content/blog",
+    "src/components/react/ProjectFilter.tsx",
+    "src/assets/images",
+    "tests/e2e/projects.spec.ts"
+  ]
+}

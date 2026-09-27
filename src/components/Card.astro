@@ -1,0 +1,87 @@
+---
+/**
+ * A content card. When `href` is set, the whole card is clickable through the title link.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+export interface Props {
+  title: string;
+  href?: string;
+  description?: string;
+  image?: ImageMetadata;
+  /** Required with `image`. Use '' only for purely decorative images. */
+  imageAlt?: string;
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { title, href, description, image, imageAlt = '', headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+---
+
+<article class:list={['card', { 'card--link': href }]}>
+  {image && (
+    <Image
+      src={image}
+      alt={imageAlt}
+      widths={[400, 800]}
+      sizes="(min-width: 48rem) 33vw, 100vw"
+      class="card-image"
+    />
+  )}
+  <div class="card-body">
+    <Heading class="card-title">{href ? <a href={href}>{title}</a> : title}</Heading>
+    {description && <p class="muted">{description}</p>}
+    <slot />
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-bg);
+    border: var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .card-body {
+    padding: var(--space-5);
+  }
+  .card-title {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+  }
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Stretch the title link over the whole card. */
+  .card--link .card-title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .card--link:hover .card-title a {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  .card--link:has(a:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  .card--link .card-title a:focus-visible {
+    outline: none;
+  }
+  .card-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

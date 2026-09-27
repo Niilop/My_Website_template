@@ -1,0 +1,66 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage, Image } from 'astro:assets';
+import { render } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublished } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublished('blog');
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, cover } = post.data;
+const { Content } = await render(post);
+const socialImage = cover
+  ? await getImage({ src: cover.src, width: 1200, height: 630, format: 'jpg' })
+  : undefined;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={socialImage?.src}
+  imageAlt={cover?.alt}
+  type="article"
+>
+  <article class="container container--narrow post">
+    <header>
+      <p class="muted">
+        <a href="/blog/">Blog</a> / <FormattedDate date={pubDate} />
+        {updatedDate && (
+          <>
+            {' '}
+            · Updated <FormattedDate date={updatedDate} />
+          </>
+        )}
+      </p>
+      <h1>{title}</h1>
+    </header>
+    {cover && (
+      <Image
+        src={cover.src}
+        alt={cover.alt}
+        widths={[640, 1024]}
+        sizes="(min-width: 44rem) 44rem, 100vw"
+        class="cover"
+      />
+    )}
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    padding-top: var(--space-8);
+  }
+  .cover {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
+  }
+</style>

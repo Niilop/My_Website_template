@@ -1,0 +1,183 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import Button from '../../components/Button.astro';
+import Gallery from '../../components/Gallery.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { availabilityLabel, getWorks, slugify, type Work } from '../../lib/content';
+import { site } from '../../site.config';
+
+export const getStaticPaths = (async () => {
+  const works = await getWorks();
+  return works.map((work, index) => ({
+    params: { id: work.id },
+    props: { work, newer: works[index - 1], older: works[index + 1] },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  work: Work;
+  newer?: Work;
+  older?: Work;
+}
+
+const { work, newer, older } = Astro.props;
+const { title, year, medium, dimensions, image, details, series, availability, price } = work.data;
+const { Content } = await render(work);
+const socialImage = await getImage({ src: image.src, width: 1200, height: 630, format: 'jpg' });
+const canEnquire = availability === 'available' || availability === 'on-request';
+const enquiry = `mailto:${site.contact.email}?subject=${encodeURIComponent(`Enquiry: ${title} (${year})`)}`;
+---
+
+<BaseLayout
+  title={title}
+  description={`${title}, ${year}. ${medium}${dimensions ? `, ${dimensions}` : ''}.`}
+  image={socialImage.src}
+  imageAlt={image.alt}
+  type="article"
+>
+  <article class="container container--wide work">
+    <div class="media">
+      <Gallery
+        layout="feature"
+        label={`${title}: images`}
+        images={[{ src: image.src, alt: image.alt }, ...details.map((detail) => ({ ...detail }))]}
+      />
+    </div>
+
+    <div class="info">
+      <p class="muted back">
+        <a href="/works/">← Works</a>
+      </p>
+      <h1>{title}</h1>
+      <dl>
+        <dt>Year</dt>
+        <dd>{year}</dd>
+        <dt>Medium</dt>
+        <dd>{medium}</dd>
+        {dimensions && (
+          <>
+            <dt>Dimensions</dt>
+            <dd>{dimensions}</dd>
+          </>
+        )}
+        {series && (
+          <>
+            <dt>Series</dt>
+            <dd>
+              <a href={`/works/#${slugify(series)}`}>{series}</a>
+            </dd>
+          </>
+        )}
+        {availability && (
+          <>
+            <dt>Availability</dt>
+            <dd>
+              {availabilityLabel[availability]}
+              {availability === 'available' && price && <span> · {price}</span>}
+            </dd>
+          </>
+        )}
+      </dl>
+      {canEnquire && site.contact.email && (
+        <Button href={enquiry} variant="secondary">
+          Enquire about this work
+        </Button>
+      )}
+      <div class="prose text">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {(newer || older) && (
+    <nav class="container container--wide pager" aria-label="More works">
+      {newer ? (
+        <a href={`/works/${newer.id}/`} rel="prev">
+          <span class="muted">Previous</span>
+          {newer.data.title}
+        </a>
+      ) : (
+        <span />
+      )}
+      {older && (
+        <a href={`/works/${older.id}/`} rel="next" class="next">
+          <span class="muted">Next</span>
+          {older.data.title}
+        </a>
+      )}
+    </nav>
+  )}
+</BaseLayout>
+
+<style>
+  .work {
+    display: grid;
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+  }
+  @media (min-width: 64rem) {
+    .work {
+      grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+      align-items: start;
+    }
+    .info {
+      position: sticky;
+      top: var(--space-5);
+    }
+  }
+  .back {
+    margin-bottom: var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .back a {
+    color: inherit;
+  }
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-5);
+    margin: var(--space-5) 0 var(--space-6);
+  }
+  dt {
+    color: var(--color-text-muted);
+  }
+  dd {
+    margin: 0;
+  }
+  .text {
+    margin-top: var(--space-6);
+  }
+  .text:empty {
+    display: none;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: var(--border);
+  }
+  .pager a {
+    display: grid;
+    color: var(--color-text);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+  }
+  .pager a:hover {
+    text-decoration: underline;
+  }
+  .pager span {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+  }
+  .next {
+    text-align: right;
+  }
+</style>

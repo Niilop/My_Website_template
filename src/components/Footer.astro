@@ -1,0 +1,122 @@
+---
+/**
+ * Site footer with contact details, social links, and navigation.
+ * Content comes from src/site.config.ts.
+ */
+import { site } from '../site.config';
+
+const { email, phone, address } = site.contact;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container columns">
+    <section aria-labelledby="footer-contact">
+      <h2 id="footer-contact" class="heading">
+        {site.name}
+      </h2>
+      <address>
+        {address.length > 0 && (
+          <p>
+            {address.map((line) => (
+              <span class="line">{line}</span>
+            ))}
+          </p>
+        )}
+        {email && (
+          <p>
+            <a href={`mailto:${email}`}>{email}</a>
+          </p>
+        )}
+        {phone && (
+          <p>
+            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>
+          </p>
+        )}
+      </address>
+    </section>
+
+    <nav aria-labelledby="footer-nav">
+      <h2 id="footer-nav" class="heading">
+        Pages
+      </h2>
+      <ul>
+        {site.nav.map((link) => (
+          <li>
+            <a href={link.href}>{link.label}</a>
+          </li>
+        ))}
+        {site.headerCta && (
+          <li>
+            <a href={site.headerCta.href}>{site.headerCta.label}</a>
+          </li>
+        )}
+      </ul>
+    </nav>
+
+    {site.social.length > 0 && (
+      <nav aria-labelledby="footer-social">
+        <h2 id="footer-social" class="heading">
+          Elsewhere
+        </h2>
+        <ul>
+          {site.social.map((link) => (
+            <li>
+              <a href={link.href} rel="me noopener">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </div>
+  <div class="container legal">
+    <p>
+      © {year} {site.name}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-8);
+    padding-block: var(--space-7) var(--space-5);
+    border-top: var(--border);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+  }
+  .columns {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  }
+  .heading {
+    font-size: var(--text-base);
+    margin-bottom: var(--space-3);
+  }
+  address {
+    font-style: normal;
+  }
+  address p {
+    margin-bottom: var(--space-2);
+  }
+  .line {
+    display: block;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li + li {
+    margin-top: var(--space-2);
+  }
+  .legal {
+    margin-top: var(--space-6);
+    color: var(--color-text-muted);
+  }
+  .legal p {
+    margin: 0;
+  }
+</style>
