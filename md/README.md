@@ -15,7 +15,7 @@ The root [README](../README.md) is the user-facing guide (setup, branding, conte
 
 ## Starting a project from this template
 
-1. If a starter fits, apply it first (`npm run starter -- apply <name>`; see the root README). Then replace `PROJECT.md` with the new site's purpose, audience, pages, content owner (you or the client), and boundaries. Mark unanswered questions explicitly rather than guessing.
+1. Replace `PROJECT.md` with the new site's purpose, audience, pages, content owner (you or the client), and boundaries. Mark unanswered questions explicitly rather than guessing.
 2. Decide the per-project options and record them in `DECISIONS.md`: hosting, contact form (off, own endpoint, or hosted service), CMS (none or which), analytics, languages.
 3. Review `ARCHITECTURE.md` against what you keep; remove described sections you delete (blog, services, React filter).
 4. Review `DEVELOPMENT.md` and root `AGENTS.md` for the actual environment and deployment.

@@ -46,13 +46,23 @@ Record choices that future maintainers would otherwise have to rediscover. Routi
 
 ## D007 — Site versions as starter overlays on main
 
-- Status: accepted.
+- Status: superseded by D008.
 - Date: 2026-09-27.
 - Context: different kinds of sites (general portfolio, artist, later CV) share most components, checks, and deployment but differ in pages, content model, and look.
 - Decision: keep one branch. Shared components live in `src/`; each version is `starters/<name>/` with a removal list and overlay files, applied once with `npm run starter -- apply <name>`. CI verifies every starter in a temporary copy.
 - Alternatives: a branch or repository per version (simple, but every shared improvement has to be merged into each and they drift); a runtime theme/config switch (turns the template into a page-builder framework).
 - Consequences: a small copy script to maintain; starter files are full replacements, so new config fields or tokens must be added to each starter (type drift is caught by `verify`, CSS tokens are not). Apply a starter before customizing; there is no way to switch afterwards.
-- References: [plan 002](plans/002-starters-and-artist.md), `scripts/starter.ts`.
+- References: [plan 002](plans/002-starters-and-artist.md), `scripts/starter.ts` (removed in D008).
+
+## D008 — One template per repository
+
+- Status: accepted.
+- Date: 2026-10-17.
+- Context: the starter overlays from D007 (a manifest, a copy script, a second CI job, and full-replacement config files that must track the template) were more machinery than one alternative version justified.
+- Decision: each kind of site is its own template repository. This repository is the general portfolio / small-business template; the artist portfolio moved to a separate repository (`My_Artist_template`). Starters, `scripts/starter.ts`, and the `starters` CI job are removed.
+- Alternatives: keep starters (D007); keep versions as long-lived branches (same drift as separate repositories, but less visible).
+- Consequences: improvements to shared components (header, footer, gallery and viewer, SEO, tests) must be copied to each template repository by hand, and the repositories will drift. Each repository is an ordinary site with one set of checks.
+- References: D007.
 
 ## Adding a decision
 

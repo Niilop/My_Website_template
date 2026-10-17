@@ -38,17 +38,3 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
-
-  # Applies each starter (starters/<name>) in a temporary copy and runs the checks there.
-  starters:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run starter -- verify
