@@ -3,7 +3,7 @@
 - Status: complete
 - Updated: 2026-09-27
 - Branch / PR: main (uncommitted at time of writing)
-- Related decisions: D007
+- Related decisions: D007, D008 (2026-10-17: starters removed; the artist version moved to its own repository; the shared gallery work remains)
 
 ## Goal
 

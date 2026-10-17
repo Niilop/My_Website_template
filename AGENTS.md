@@ -16,7 +16,6 @@
 - Images: import from `src/assets/` and render with `astro:assets` (`Image`, `getImage`) so dimensions and formats are generated. Every image needs meaningful `alt` text, or `alt=""` if decorative.
 - Accessibility is a requirement: semantic HTML, keyboard operability, visible focus, sufficient contrast in light and dark themes, reduced-motion support.
 - Optional sections (blog, services, projects, React filter, contact form) must remain removable without breaking the build. Guard empty collections.
-- Starters (`starters/<name>/`) are alternative site versions applied with `npm run starter -- apply <name>`. Shared components stay in `src/`; a starter's `files/` holds only what differs. When changing a shared component, config field, token, or test, check whether starters need the same change (a starter's `site.config.ts` and `tokens.css` are full replacements), and run `npm run starter -- verify`. `starters/` is excluded from `astro check` and ESLint in the template itself; `verify` checks them after applying.
 - Secrets only in environment variables declared in `astro.config.ts` (`env.schema`) and documented in `.env.example`. Never commit `.env` or real keys.
 - Prefer existing dependencies and the platform. Use npm (project-local). Ask before installing anything globally, including browser system libraries.
 
@@ -28,7 +27,7 @@ npm run test:e2e          # builds, then Playwright (needs Chromium + system lib
 npm run test:e2e:docker   # same, in the Playwright Docker image, if host libraries are missing
 ```
 
-`npm run verify` runs all of it. After changing shared code or a starter, also run `npm run starter -- verify`. Run checks relevant to the change and report what actually ran and the results; if a check could not run (for example, missing browser libraries), say so rather than presenting it as passed. Documentation-only changes need link/path checks, not the full suite.
+`npm run verify` runs all of it. Run checks relevant to the change and report what actually ran and the results; if a check could not run (for example, missing browser libraries), say so rather than presenting it as passed. Documentation-only changes need link/path checks, not the full suite.
 
 ## Working style
 

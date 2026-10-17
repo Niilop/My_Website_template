@@ -22,17 +22,14 @@ Astro 7 starts `astro dev`/`astro preview` in the background when it detects an 
 
 ## Validation
 
-| Command                            | Checks                                                                                               |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run format:check`             | Prettier (with the Astro plugin)                                                                     |
-| `npm run lint`                     | ESLint: JS, TypeScript, Astro recommended rules                                                      |
-| `npm run check`                    | `astro check`: types in `.astro`/`.ts`/`.tsx`, content schemas                                       |
-| `npm run test:unit`                | `node --test tests/unit/`: contact validation, spam checks, delivery (fake fetch)                    |
-| `npm run test:e2e`                 | Builds, serves `dist/` with `astro preview`, runs Playwright on desktop and mobile Chromium          |
-| `npm run verify`                   | All of the above, in CI order                                                                        |
-| `npm run starter -- verify [name]` | Applies each starter in a temporary copy and runs check, lint, unit, and e2e there (CI's second job) |
-
-Run `npm run starter -- verify` after changing shared components, config fields, tokens, schemas, or tests, since starters reuse them. A failed run keeps the temporary copy and prints its path for inspection.
+| Command                | Checks                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run format:check` | Prettier (with the Astro plugin)                                                            |
+| `npm run lint`         | ESLint: JS, TypeScript, Astro recommended rules                                             |
+| `npm run check`        | `astro check`: types in `.astro`/`.ts`/`.tsx`, content schemas                              |
+| `npm run test:unit`    | `node --test tests/unit/`: contact validation, spam checks, delivery (fake fetch)           |
+| `npm run test:e2e`     | Builds, serves `dist/` with `astro preview`, runs Playwright on desktop and mobile Chromium |
+| `npm run verify`       | All of the above, in CI order                                                               |
 
 The e2e suite reads the sitemap to find pages, so new pages are covered automatically. Per page: status 200, one `h1`, title, description, absolute canonical and `og:image`, no `img` without `alt`, no script errors, and axe WCAG 2.1 A/AA with no violations in light and dark themes. Also: 404 page and status, robots.txt, gallery viewer (first page with a gallery, including axe with the viewer open), skip link, mobile menu keyboard behavior, `aria-current`, and the React filter.
 

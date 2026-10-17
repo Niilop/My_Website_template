@@ -13,20 +13,19 @@ Optional (off by default): POST /api/contact --> src/pages/api/contact.ts (on-de
   --> lib/contact/handler.ts: honeypot + time check --> validate --> Turnstile (if configured) --> deliver (Resend | webhook)
 ```
 
-| Location                                                               | Responsibility                                                                                                 |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [src/site.config.ts](../src/site.config.ts)                            | Name, URL, description, language, nav, header CTA, contact details, social links, contact form switch          |
-| [src/styles/tokens.css](../src/styles/tokens.css)                      | Design tokens (colors, type, spacing, widths, borders) with dark-mode overrides                                |
-| [src/styles/global.css](../src/styles/global.css)                      | Base element styles, focus, reduced motion, `.container`, `.grid`, `.prose` helpers                            |
-| [src/layouts/BaseLayout.astro](../src/layouts/BaseLayout.astro)        | Document shell: `Seo`, favicon, skip link, `Header`, `<main>`, `Footer`; adds `.js` class to `<html>`          |
-| [src/components/](../src/components/)                                  | Presentational Astro components; `Seo` builds title, description, canonical, Open Graph tags                   |
-| [src/components/react/](../src/components/react/)                      | React islands; `ProjectFilter` is the only one                                                                 |
-| [src/content.config.ts](../src/content.config.ts)                      | `projects`, `services`, `blog` collections and their schemas                                                   |
-| [src/lib/content.ts](../src/lib/content.ts)                            | Draft filtering (drafts only in dev) and sort order                                                            |
-| [src/lib/contact/](../src/lib/contact/)                                | Framework-free contact form logic: validation, spam checks, delivery; unit tested                              |
-| [src/pages/](../src/pages/)                                            | Routes; `[id].astro` files generate detail pages from collections; `api/_contact.ts` is unrouted until renamed |
-| [starters/](../starters/), [scripts/starter.ts](../scripts/starter.ts) | Alternative site versions (overlay files + removal list) and the `list`/`apply`/`verify` command               |
-| [tests/unit/](../tests/unit/), [tests/e2e/](../tests/e2e/)             | `node:test` unit tests; Playwright page, navigation, gallery viewer, and React island tests                    |
+| Location                                                        | Responsibility                                                                                                 |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [src/site.config.ts](../src/site.config.ts)                     | Name, URL, description, language, nav, header CTA, contact details, social links, contact form switch          |
+| [src/styles/tokens.css](../src/styles/tokens.css)               | Design tokens (colors, type, spacing, widths, borders) with dark-mode overrides                                |
+| [src/styles/global.css](../src/styles/global.css)               | Base element styles, focus, reduced motion, `.container`, `.grid`, `.prose` helpers                            |
+| [src/layouts/BaseLayout.astro](../src/layouts/BaseLayout.astro) | Document shell: `Seo`, favicon, skip link, `Header`, `<main>`, `Footer`; adds `.js` class to `<html>`          |
+| [src/components/](../src/components/)                           | Presentational Astro components; `Seo` builds title, description, canonical, Open Graph tags                   |
+| [src/components/react/](../src/components/react/)               | React islands; `ProjectFilter` is the only one                                                                 |
+| [src/content.config.ts](../src/content.config.ts)               | `projects`, `services`, `blog` collections and their schemas                                                   |
+| [src/lib/content.ts](../src/lib/content.ts)                     | Draft filtering (drafts only in dev) and sort order                                                            |
+| [src/lib/contact/](../src/lib/contact/)                         | Framework-free contact form logic: validation, spam checks, delivery; unit tested                              |
+| [src/pages/](../src/pages/)                                     | Routes; `[id].astro` files generate detail pages from collections; `api/_contact.ts` is unrouted until renamed |
+| [tests/unit/](../tests/unit/), [tests/e2e/](../tests/e2e/)      | `node:test` unit tests; Playwright page, navigation, gallery viewer, and React island tests                    |
 
 ## Content model
 
@@ -35,16 +34,6 @@ Optional (off by default): POST /api/contact --> src/pages/api/contact.ts (on-de
 - `blog`: title, description, pubDate, updatedDate, optional cover, draft. Listing and detail under `/blog/`.
 - Entry IDs come from file names. Images are referenced relative to the Markdown file and optimized by `astro:assets`.
 - Empty collections render without errors (sections hidden or "nothing yet" message); the build logs a warning.
-
-## Starters
-
-A starter is `starters/<name>/starter.json` (`name`, `description`, `remove`) plus `files/`, which mirrors the repository root. `apply` deletes the `remove` paths, copies `files/` over the root, and deletes `starters/` (unless `--keep`); it refuses to run with uncommitted Git changes unless `--force`. Paths outside the repository are rejected. `verify` copies the repository to a temporary directory (symlinking `node_modules`), applies the starter, and runs `check`, `lint`, `test:unit`, and `test:e2e` with `CI=1`.
-
-Starter files are full replacements: a starter's `site.config.ts`, `tokens.css`, `content.config.ts`, and `lib/content.ts` do not inherit later additions to the template's versions. Type or content-schema drift is caught by `verify`; a new CSS token is not, so add new tokens to each starter's `tokens.css`.
-
-| Starter  | Replaces / adds                                                                                                                                                                                                                                                                                     | Removes                                                                                          |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `artist` | Config, tokens (serif headings, square corners), `works` collection (Markdown) and `exhibitions` (YAML via `file()` loader), home, works list (grouped by series), work detail (feature gallery, details list, enquiry `mailto:`, previous/next), about, logo, icons, social image, `works.spec.ts` | Projects, services, blog pages and content, `ProjectFilter`, template images, `projects.spec.ts` |
 
 ## Key behaviors
 

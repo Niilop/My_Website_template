@@ -25,7 +25,6 @@ npm run dev        # http://localhost:4321, reloads on save
 | `npm run test:e2e`        | Build, then run browser and accessibility tests with Playwright       |
 | `npm run test:e2e:docker` | Same, inside the Playwright Docker image (no browser install on host) |
 | `npm run verify`          | Format check, lint, type check, unit and e2e tests                    |
-| `npm run starter -- list` | Show the available [starters](#starters) (alternative site versions)  |
 
 Browser tests need Chromium once: `npx playwright install chromium`. On Linux/WSL, Chromium also needs system libraries (`npx playwright install-deps chromium`, which uses sudo). If you would rather not install those, use `npm run test:e2e:docker`.
 
@@ -48,49 +47,13 @@ src/
 public/                 Files served as-is: favicon.svg, apple-touch-icon.png, og-default.png
 tests/unit/, tests/e2e/ Unit tests and Playwright browser tests
 docs/integrations.md    Contact form, CMS, analytics, fonts, languages, React
-starters/               Alternative versions of the site (e.g. artist portfolio); see Starters
-scripts/starter.ts      The `npm run starter` command
 md/, AGENTS.md          Development context for maintainers and AI coding agents
 ```
-
-## Starters
-
-The template ships as a general portfolio / small-business site. **Starters** are alternative versions that reuse the same components, checks, and deployment but change the pages, content model, and look:
-
-| Starter  | For                                                                                                       |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| _(none)_ | Portfolio or small business: services, projects, blog                                                     |
-| `artist` | Artists: works with medium, dimensions, series, availability; exhibitions; image-first layout, serif type |
-
-To use one, do it first, in a fresh copy of the template:
-
-```bash
-npm run starter -- list           # see what is available
-npm run starter -- apply artist   # swap in the artist version
-npm run dev
-```
-
-`apply` deletes the example files the starter doesn't use, copies the starter's files into place, and removes the `starters/` folder, leaving an ordinary site. It refuses to run with uncommitted changes. Everything below (branding, content, pages, deployment) then works the same way.
-
-<details>
-<summary>How starters work, and how to add one</summary>
-
-A starter is a folder `starters/<name>/` containing:
-
-- `starter.json`: a name, a one-line description, and `remove`, the list of template files and folders to delete (for example `src/pages/blog`).
-- `files/`: files copied over the template, at the same paths (for example `files/src/site.config.ts`, `files/src/pages/index.astro`). Only include files that differ.
-
-Shared building blocks (header, footer, gallery and viewer, buttons, layout, SEO) stay in `src/` so that improvements reach every starter. Put a component in a starter only if it is specific to that kind of site.
-
-`npm run starter -- verify` applies each starter in a temporary copy and runs the type check, lint, unit tests, build, and browser tests there. CI runs it on every push. To add a starter: copy `starters/artist/` as an example, change `starter.json`, replace the files, and run `verify`.
-
-</details>
 
 ## Turn the template into a real website
 
 Work through this checklist for each new project:
 
-- [ ] **Version:** if a [starter](#starters) fits (e.g. `artist`), apply it first.
 - [ ] **Identity:** edit `src/site.config.ts`: name, production `url`, description, language, navigation, contact details, social links.
 - [ ] **Look:** adjust colors and fonts in `src/styles/tokens.css` (both light and dark sections).
 - [ ] **Logo and icons:** replace `src/assets/brand/logo.svg`, `public/favicon.svg`, `public/apple-touch-icon.png` (180×180), and `public/og-default.png` (1200×630 social preview).
@@ -201,7 +164,7 @@ The default site uses no environment variables. The optional contact form reads 
 
 ## Checks and CI
 
-`npm run verify` runs the same checks as CI's main job (`.github/workflows/ci.yml`): Prettier, ESLint, `astro check`, unit tests, a production build, and Playwright tests at desktop and mobile sizes. The browser tests visit every page in the sitemap and check the title, description, canonical URL, social image, image alt attributes, and axe accessibility rules (WCAG 2.1 AA, light and dark themes), plus keyboard use of the skip link and mobile menu, the gallery viewer, and the 404 page. New pages are covered automatically. A second CI job runs `npm run starter -- verify`, which checks every starter the same way.
+`npm run verify` runs the same checks as CI (`.github/workflows/ci.yml`): Prettier, ESLint, `astro check`, unit tests, a production build, and Playwright tests at desktop and mobile sizes. The browser tests visit every page in the sitemap and check the title, description, canonical URL, social image, image alt attributes, and axe accessibility rules (WCAG 2.1 AA, light and dark themes), plus keyboard use of the skip link and mobile menu, the gallery viewer, and the 404 page. New pages are covered automatically.
 
 Dependabot (`.github/dependabot.yml`) opens weekly grouped update PRs. `@playwright/test` is pinned to match the Docker image tag in the `test:e2e:docker` script; update both together.
 

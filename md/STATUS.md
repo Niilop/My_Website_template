@@ -2,11 +2,11 @@
 
 ## Current state
 
-The repository is a generic Astro website template: central config and tokens, component library, example pages and content, optional contact form (off), metadata/sitemap/robots, CI with lint, type, unit, browser, and accessibility checks, and Netlify config. Starters provide alternative versions; `artist` exists. No specific website is defined yet.
+The repository is a generic Astro website template: central config and tokens, component library, example pages and content, optional contact form (off), metadata/sitemap/robots, CI with lint, type, unit, browser, and accessibility checks, and Netlify config. No specific website is defined yet. Other kinds of site are separate template repositories ([D008](DECISIONS.md#d008--one-template-per-repository)); the artist portfolio is `My_Artist_template`.
 
 ## Active work
 
-None. [Plan 001](plans/001-template-baseline.md) (baseline) and [plan 002](plans/002-starters-and-artist.md) (starters, artist version, gallery viewer) are complete. A CV starter is a candidate next version.
+None. [Plan 001](plans/001-template-baseline.md) (baseline) and [plan 002](plans/002-starters-and-artist.md) (gallery viewer; its starter mechanism was removed by D008) are complete. A CV template would be a new repository.
 
 ## Blockers and open questions
 
